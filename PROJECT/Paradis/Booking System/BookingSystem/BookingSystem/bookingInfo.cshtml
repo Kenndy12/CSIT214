@@ -1,0 +1,122 @@
+﻿@{ 
+    var loggedInOrNot = Session["loggedIn"];
+    if (loggedInOrNot == null || !loggedInOrNot.ToString().Equals("true"))
+    {
+        Response.Redirect("~/LoginPage.cshtml");
+
+    }
+    var roomInfo = UrlData[0];
+    var db = Database.Open("AccountsDB");
+    var selectQuery = "Select *,CONVERT(varchar,date,3) as realDate from Rooms where Id =@0";
+
+    var row = db.QuerySingle(selectQuery, roomInfo);
+
+    var name = row.name;
+    decimal price = row.price;
+    var maxCapacity = row.capacity;
+    var date = row.realDate;
+    var timeStart = row.timeStart;
+    var timeEnd = row.timeEnd;
+    var promoCode = row.promoCode;
+    var actualCapacity = Decimal.Zero;
+    int promocodeUsed = 0;
+    decimal actualPrice = Decimal.Zero;
+    var ErrorMsg = "";
+
+    Validation.RequireField("roomActCapacity","Please enter the number of people in your party");
+    if(IsPost && Validation.IsValid())
+    {
+        promoCode = Request.Form["roomCode"];
+        actualCapacity = Request.Form["roomActCapacity"].AsDecimal();
+        if(promoCode != "NONECHOSEN")
+        {
+            actualPrice = price - ((price * 10) / 100);
+            promocodeUsed = 1;
+        }
+        var userId= Session["id"];
+
+
+        var updateQuery = "Update rooms set booked=@0,bookedBy=@1,actualCapacity=@2, " +
+                    "promoCodeUsed=@3,actualCost=@4 where Id=@5";
+
+        db.Execute(updateQuery,1,userId,actualCapacity,promocodeUsed,actualPrice,roomInfo);
+
+        Response.Redirect(@Href("~/StudentPage.cshtml"));
+    }
+    else if(IsPost && !Validation.IsValid())
+    {
+        ErrorMsg = " ";
+
+        ErrorMsg = "Please Enter the number of people in your party";
+    }
+}
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+    <button><a href="~/StudentPage.cshtml" style="text-decoration:none;">Home</a></button><br />
+    <form method="post">
+        <fieldset>
+            <div>
+                <div>
+                    <label>Room Name: </label>
+                    <input name="roomName" type="text" size="50" value="@name" READONLY />
+                </div>
+
+                <div>
+                    <label>Price: </label>
+                    <input name="roomPrice" type="number" size="50" value="@price" READONLY />
+                </div>
+
+                <div>
+                    <label>Max Capacity: </label>
+                    <input name="roomCapacity" type="number" size="50" value="@maxCapacity" READONLY />
+                </div>
+
+                <div>
+                    <label>Date: </label>
+                    <input name="roomDate" type="text" size="50" value="@date" READONLY />
+                </div>
+
+                <div>
+                    <label>Start Time: </label>
+                    <input name="roomTimeStart" type="time" size="50" value="@timeStart" READONLY />
+                </div>
+
+                <div>
+                    <label>End Time: </label>
+                    <input name="roomTimeEnd" type="time" size="50" value="@timeEnd" READONLY />
+                </div>
+
+                <div>
+                    <label>Promotional Code:  </label>
+                    <select name="roomCode">
+                        <option value="NONECHOSEN">NONE</option>
+                        <option value="PROMOCHOSEN" selected>@promoCode</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label>Number of people using room: </label>
+                    <input name="roomActCapacity" type="number" min="1" max="@maxCapacity" />
+                </div>
+
+                <div>
+                    <div>
+                        <label>&nbsp;</label>
+                        <input type="submit" value="Book Room" class="submit" />
+                    </div>
+                </div>
+
+                <div>
+                    <span>@ErrorMsg</span>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+</body>
+</html>

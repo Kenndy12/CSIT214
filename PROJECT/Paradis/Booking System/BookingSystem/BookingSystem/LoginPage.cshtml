@@ -1,0 +1,79 @@
+﻿
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login Page</title>
+</head>
+<body>
+    <form method="post" action="">
+        <h1>Login</h1><br />
+        <h3>Please enter your username and password:</h3>
+
+        <label for="txtUserName">Username</label>
+        <input type="text" id="userNameInput" name="userNameInput" />
+        <br />
+
+        <label for="txtPassword">Password</label>
+        <input type="password" id="passwordInput" name="passwordInput">
+        <br/><br/>
+
+        <input type="submit" value="Login" />
+        <br />
+        @{
+
+            Validation.RequireField("userNameInput", "Username is required.");
+            Validation.RequireField("passwordInput", "Password is required");
+
+            var db = Database.Open("AccountsDB");
+
+            if (IsPost && Validation.IsValid())
+            {
+
+                var loginSql =
+                    "SELECT * FROM allAccounts WHERE userName=@0 AND password=@1 ";
+                var username = Request.Form["userNameInput"];
+                var password = Request.Form["passwordInput"];
+
+                var data = db.QuerySingle(loginSql, username, password);
+
+                if (data != null)
+                {
+                    Session["loggedIn"] = "true";
+                    Session["username"] = data[1];
+                    Session["id"] = data[0];
+                    var accountType = data[3];
+
+                    if(accountType == "STAFF")
+                    {
+                        Response.Redirect("StaffPage.cshtml");
+                    }
+                    else if(accountType =="STUDENT")
+                    {
+                        Response.Redirect("StudentPage.cshtml");
+                    }
+                    else
+                    {
+                        Response.Redirect("SuperUserPage.cshtml");
+                    }
+
+                }
+                else
+                {
+                    Session["loggedIn"] = "false";
+                    var errorMsg = "Wrong Username and/or Password";
+                    <p>@errorMsg</p>
+                   
+                }
+            }
+            else if(IsPost & !Validation.IsValid())
+            {
+                var errorMsg = "Username and/or password required";
+                <p>@errorMsg</p>
+            }
+        }
+
+          
+    </form>
+</body>
+</html>

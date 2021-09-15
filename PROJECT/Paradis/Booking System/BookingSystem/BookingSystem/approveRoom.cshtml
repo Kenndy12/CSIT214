@@ -1,0 +1,19 @@
+﻿@{ 
+    var roomInfo = UrlData[0];
+
+    var db = Database.Open("AccountsDB");
+
+    var updateQuery = "Update rooms set approved =1 where Id=@0";
+    db.Execute(updateQuery, roomInfo);
+    Response.Redirect("~/SuperUserPage.cshtml");
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+
+</body>
+</html>

@@ -1,0 +1,49 @@
+﻿@{ 
+
+    var loggedInOrNot = Session["loggedIn"];
+    if (loggedInOrNot == null || !loggedInOrNot.ToString().Equals("true"))
+    {
+        Response.Redirect("~/LoginPage.cshtml");
+
+    }
+
+    var db = Database.Open("AccountsDB");
+
+    var selectQuery = "SELECT Id,name,price,CONVERT(varchar,date,3) as date,capacity from Rooms Where Launched = 1 and Booked = 0 and approved = 1";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Page</title>
+    <link rel="stylesheet" href="~/stylesheetFile.css" />
+</head>
+<body>
+    <button><a href="~/viewBooking.cshtml" style="text-decoration:none;">View Bookings</a></button>
+    <button><a href="~/LoginPage.cshtml" style="text-decoration:none;">Log Out</a></button>
+    <table class="studentTable">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Date</th>
+                <th>Max Capacity</th>
+                <th>&nbsp;</th>
+            </tr>
+        </thead>
+        @foreach (var row in db.Query(selectQuery))
+        {
+            <tbody>
+                <tr>
+                    <td>@row.name</td>
+                    <td>@row.price</td>
+                    <td>@row.date</td>
+                    <td>@row.capacity</td>
+                    <td><a href="@Href("~/bookingInfo.cshtml",row.Id)" style="text-decoration:none;">Book Room</a></td>
+                </tr>
+            </tbody>
+
+        }
+    </table>
+</body>
+</html>

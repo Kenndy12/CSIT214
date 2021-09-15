@@ -1,0 +1,79 @@
+﻿@{ 
+    var loggedInOrNot = Session["loggedIn"];
+    if (loggedInOrNot == null || !loggedInOrNot.ToString().Equals("true"))
+    {
+        Response.Redirect("~/LoginPage.cshtml");
+
+    }
+
+    var roomId = UrlData[0];
+
+    var db = Database.Open("AccountsDB");
+
+    var selectQuery = "Select name,price,capacity,CONVERT(varchar,date,3) as date," +
+                "timeStart,timeEnd,launched,booked,bookedBy,promoCode from Rooms where Id=@0";
+
+
+}
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Room Info</title>
+</head>
+<body>
+    <button><a href="~/StaffPage.cshtml" style="text-decoration:none;">Home</a></button><br />
+    <button><a href="~/LoginPage.cshtml" style="text-decoration:none;">Log Out</a></button>
+    @foreach (var info in db.Query(selectQuery, roomId))
+    {
+        <label>Room Name : </label>
+        <label>@info.name</label><br />
+
+        <label>Room Price : </label>
+        <label>@info.price</label> <br />
+
+        <label>Room Capacity : </label>
+        <label>@info.capacity</label> <br />
+
+        <label>Date : </label>
+        <label>@info.date</label> <br />
+
+        <label>Start Time : </label>
+        <label>@info.timeStart</label> <br />
+
+        <label>End Time : </label>
+        <label>@info.timeEnd</label> <br />
+
+        var launched = "LAUNCHED";
+        if (!info.launched)
+        {
+            launched = "NOT LAUNCHED";
+        }
+        <label>Launch Status : </label>
+        <label>@launched</label> <br />
+
+        if (info.booked)
+        {
+            <label>Booked : </label>
+            <label>BOOKED</label> <br />
+
+            var selectUserName = "Select * from allAccounts where accId = @0";
+            var userInfo = db.QuerySingle(selectUserName, info.bookedBy);
+            <label>Booked By : </label>
+            <label>@userInfo.userName</label> <br />
+        }
+        else
+        {
+            <label>Booked Status: </label>
+            <label>NOT BOOKED</label> <br />
+        }
+
+        <label>Promo Code : </label>
+        <label>@info.promoCode</label> <br />
+
+
+
+    }
+</body>
+</html>

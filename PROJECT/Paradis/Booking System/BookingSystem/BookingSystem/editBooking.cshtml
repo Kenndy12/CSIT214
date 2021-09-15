@@ -1,0 +1,136 @@
+﻿@{ 
+
+    var loggedInOrNot = Session["loggedIn"];
+    if (loggedInOrNot == null || !loggedInOrNot.ToString().Equals("true"))
+    {
+        Response.Redirect("~/LoginPage.cshtml");
+    }
+
+    var roomInfo = UrlData[0];
+    var db = Database.Open("AccountsDB");
+    var selectQuery = "Select *,CONVERT(varchar,date,3) as realDate from Rooms where Id =@0";
+
+    var row = db.QuerySingle(selectQuery, roomInfo);
+
+    var name = row.name;
+    decimal price = row.price;
+    var maxCapacity = row.capacity;
+    var date = row.realDate;
+    var timeStart = row.timeStart;
+    var timeEnd = row.timeEnd;
+    var promoCode = row.promoCode;
+    var actualCapacity = row.actualCapacity;
+    Boolean promocodeUsed = row.promocodeUsed;
+    decimal actualPrice = row.actualCost;
+    var ErrorMsg = "";
+
+    Validation.RequireField("roomActCapacity", "Please enter the number of people in your party");
+
+    if (IsPost && Validation.IsValid())
+    {
+        promoCode = Request.Form["roomCode"];
+
+        if (promoCode == "NONECHOSEN")
+        {
+            actualPrice = price;
+            promocodeUsed = false;
+        }
+        else
+        {
+            actualPrice = price - ((price * 10) / 100);
+            promocodeUsed = true;
+        }
+
+
+        var insertToPromoCodeBitAttribute = 0;
+        if (promocodeUsed)
+        {
+            insertToPromoCodeBitAttribute = 1;
+        }
+
+        actualCapacity = Request.Form["roomActCapacity"];
+        var updateQuery = "update rooms set promoCodeUsed=@0,actualCost=@1,actualCapacity=@2 where Id=@3";
+        db.Execute(updateQuery, insertToPromoCodeBitAttribute, actualPrice,actualCapacity, roomInfo);
+        Response.Redirect("~/StudentPage.cshtml");
+    }
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+    <button><a href="~/StudentPage.cshtml" style="text-decoration:none;">Home</a></button><br />
+    <button><a href="~/LoginPage.cshtml" style="text-decoration:none;">Log Out</a></button>
+    <form method="post">
+        <fieldset>
+            <div>
+                <div>
+                    <label>Room Name: </label>
+                    <input name="roomName" type="text" size="50" value="@name" READONLY />
+                </div>
+
+                <div>
+                    <label>Price: </label>
+                    <input name="roomPrice" type="number" size="50" value="@actualPrice" READONLY />
+                </div>
+
+                <div>
+                    <label>Max Capacity: </label>
+                    <input name="roomCapacity" type="number" size="50" value="@maxCapacity" READONLY />
+                </div>
+
+                <div>
+                    <label>Date: </label>
+                    <input name="roomDate" type="text" size="50" value="@date" READONLY />
+                </div>
+
+                <div>
+                    <label>Start Time: </label>
+                    <input name="roomTimeStart" type="time" size="50" value="@timeStart" READONLY />
+                </div>
+
+                <div>
+                    <label>End Time: </label>
+                    <input name="roomTimeEnd" type="time" size="50" value="@timeEnd" READONLY />
+                </div>
+
+                <div>
+                    <label>Promotional Code:  </label>
+                    <select name="roomCode">
+                        @if (promocodeUsed)
+                        {
+
+                            <option value="NONECHOSEN">NONE</option>
+                            <option value="PROMOCHOSEN" selected>@promoCode</option>
+                        }
+                        else
+                        {
+                            <option value="NONECHOSEN" selected>NONE</option>
+                            <option value="PROMOCHOSEN">@promoCode</option>
+                        }
+                    </select>
+                </div>
+
+                <div>
+                    <label>Number of people using room: </label>
+                    <input name="roomActCapacity" type="text" size="50" value="@actualCapacity" />
+                </div>
+
+                <div>
+                    <div>
+                        <label>&nbsp;</label>
+                        <input type="submit" value="Edit Booking" class="submit" />
+                        <button><a href="@Href("~/deleteBooking.cshtml",row.Id)" style="color:black;text-decoration:none;">Delete Booking</a></button>
+                    </div>
+                </div>
+
+                <div>
+                    <span>@ErrorMsg</span>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+</body>
+</html>

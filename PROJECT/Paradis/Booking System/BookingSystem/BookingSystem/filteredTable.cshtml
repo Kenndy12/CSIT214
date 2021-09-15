@@ -1,0 +1,58 @@
+﻿@{ 
+    var loggedInOrNot = Session["loggedIn"];
+    if (loggedInOrNot == null || !loggedInOrNot.ToString().Equals("true"))
+    {
+        Response.Redirect("~/LoginPage.cshtml");
+
+    }
+
+    var startDate = UrlData[0];
+    var endDate = UrlData[1];
+
+    var approved = "Pending";
+
+    var db = Database.Open("AccountsDB");
+
+    var selectQuery = "select *, CONVERT(varchar, date, 3) as realDate from rooms where launched = 1 " +
+                "and date between @0 and @1";
+
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <link rel="stylesheet" href="~/stylesheetFile.css" />
+</head>
+<body>
+    <button><a href="~/SuperUserPage.cshtml" style="text-decoration:none;">Home</a></button><br />
+    <button><a href="~/LoginPage.cshtml" style="text-decoration:none;">Log Out</a></button>
+    <table class="superUserTable">
+        <thead>
+            <tr>
+                <th>&nbsp;</th>
+                <th>Name</th>
+                <th>Date</th>
+                <th>Approved Status</th>
+                <th>&nbsp;</th>
+            </tr>
+        </thead>
+        @foreach (var row in db.Query(selectQuery, startDate, endDate))
+        {
+            <tbody>
+                <tr>
+                    <td><a href="@Href("~/moreInfoSuppUser.cshtml",row.Id)" style="text-decoration:none;">More Info</a></td>
+                    <td>@row.name</td>
+                    <td>@row.realDate</td>
+                    @if (row.approved)
+                    {
+                        approved = "Approved";
+                    }
+                    <td>@approved</td>
+                    <td><a href="@Href("~/approveRoom.cshtml",row.Id)" style="text-decoration:none;">Approve Room</a></td>
+                </tr>
+            </tbody>
+        }
+    </table>
+</body>
+</html>

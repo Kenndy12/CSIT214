@@ -1,0 +1,112 @@
+﻿@{
+
+    var loggedInOrNot = Session["loggedIn"];
+    if (loggedInOrNot == null || !loggedInOrNot.ToString().Equals("true"))
+    {
+        Response.Redirect("~/LoginPage.cshtml");
+
+    }
+
+    var db = Database.Open("AccountsDB");
+
+    var roomInfo = UrlData[0];
+
+    var selectQuery = "select name,price,capacity,CONVERT(varchar,date,23) as date,timeStart,timeEnd,promoCode from rooms " +
+                "where Id=@0";
+    var info = db.QuerySingle(selectQuery, roomInfo);
+
+    var errorMsg = "";
+
+    Validation.RequireField("roomName", "All fields are mandatory");
+    Validation.RequireField("roomPrice", "All fields are mandatory");
+    Validation.RequireField("roomCapacity", "Room capacity is required.");
+    Validation.RequireField("roomDate", "All fields are mandatoryd");
+    Validation.RequireField("roomTimeStart", "All fields are mandatory");
+    Validation.RequireField("roomTimeEnd", "All fields are mandatory");
+    Validation.RequireField("roomCode", "All fields are mandatory");
+
+    if (IsPost && Validation.IsValid())
+    {
+        var roomName = Request.Form["roomName"];
+        var price = Request.Form["roomPrice"].AsDecimal();
+        var capacity = Request.Form["roomCapacity"].AsDecimal();
+        var date = Request.Form["roomDate"].AsDateTime();
+        var timeStart = Request.Form["roomTimeStart"];
+        var timeEnd = Request.Form["roomTimeEnd"];
+        var promoCode = Request.Form["roomCode"];
+        var updateQuery = "update rooms set name=@0,price=@1,capacity=@2,date=@3,timeStart=@4,timeEnd=@5," +
+                    "promoCode=@6 where id=@7";
+        db.Execute(updateQuery, roomName, price, capacity, date, timeStart, timeEnd, promoCode, roomInfo);
+        Response.Redirect(@Href("~/StaffPage.cshtml"));
+
+    }
+
+    else if (IsPost && !Validation.IsValid())
+    {
+        errorMsg = "";
+
+        errorMsg = "All fields are mandatory";
+    }
+}
+
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Room</title>
+</head>
+<body>
+    <button><a href="~/StaffPage.cshtml" style="text-decoration:none;">Home</a></button><br />
+    <button><a href="~/LoginPage.cshtml" style="text-decoration:none;">Log Out</a></button>
+    <form method="post">
+        <fieldset>
+            <legend>Edit Room</legend>
+            <div>
+                <label>Room Name: </label>
+                <input name="roomName" type="text" size="50" value="@info.name" />
+            </div>
+
+            <div>
+                <label>Price: </label>
+                <input name="roomPrice" type="number" size="50" value="@info.price" />
+            </div>
+
+            <div>
+                <label>Capacity: </label>
+                <input name="roomCapacity" type="number" size="50" value="@info.capacity" />
+            </div>
+
+            <div>
+                <label>Date: </label>
+                <input name="roomDate" type="date" size="50" value="@info.date" />
+            </div>
+
+            <div>
+                <label>Start Time: </label>
+                <input name="roomTimeStart" type="time" size="50" value="@info.timeStart" />
+            </div>
+
+            <div>
+                <label>End Time: </label>
+                <input name="roomTimeEnd" type="time" size="50" value="@info.timeEnd" />
+            </div>
+
+            <div>
+                <label>Promotional Code: </label>
+                <input name="roomCode" type="text" size="50" value="@info.promoCode" />
+            </div>
+
+            <div>
+                <label>&nbsp;</label>
+                <input type="submit" value="Edit" />
+                <button><a href="@Href("~/deleteRoom.cshtml",@roomInfo)" style="color:black;text-decoration:none;">Delete Room</a></button>
+            </div>
+
+            <div>
+                <label>@errorMsg</label>
+            </div>
+        </fieldset>
+    </form>
+</body>
+</html>

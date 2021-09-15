@@ -1,0 +1,54 @@
+﻿@{ 
+    var loggedInOrNot = Session["loggedIn"];
+    if (loggedInOrNot == null || !loggedInOrNot.ToString().Equals("true"))
+    {
+        Response.Redirect("~/LoginPage.cshtml");
+
+    }
+
+    var db = Database.Open("AccountsDB");
+
+    var userId = Session["id"];
+    var selectQuery = "Select *,CONVERT(varchar,date,3) as realDate from Rooms where bookedBy = @0";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>List of bookings</title>
+    <link rel="stylesheet" href="~/stylesheetFile.css" />
+</head>
+<body>
+    <button><a href="~/StudentPage.cshtml" style="text-decoration:none;">Home</a></button><br />
+    <button><a href="~/LoginPage.cshtml" style="text-decoration:none;">Log Out</a></button>
+    <table class="bookingTable">
+        <thead>
+            <tr>
+                <th>&nbsp;</th>
+                <th>Room Name</th>
+                <th>Room Price</th>
+                <th>Room Date</th>
+                <th>Room Start Time</th>
+                <th>Room Stop Time</th>
+                <th>Booked for</th>
+                <th>&nbsp;</th>
+            </tr>
+        </thead>
+        @foreach (var row in db.Query(selectQuery, userId))
+        {
+            <tbody>
+                <tr>
+                    <td><a href="@Href("~/moreRoomInfo.cshtml", row.Id)" style="text-decoration:none;">More Info</a></td>
+                    <td>@row.name</td>
+                    <td>@row.actualCost</td>
+                    <td>@row.realDate</td>
+                    <td>@row.timeStart</td>
+                    <td>@row.timeEnd</td>
+                    <td>@row.actualCapacity Person</td>
+                    <td><a href="@Href("~/editBooking.cshtml",row.Id)" style="text-decoration:none;">Edit Booking</a></td>
+                </tr>
+            </tbody>
+        }
+    </table>
+</body>
+</html>

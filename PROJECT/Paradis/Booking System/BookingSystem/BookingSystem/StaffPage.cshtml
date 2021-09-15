@@ -1,0 +1,61 @@
+﻿@{ 
+
+    var loggedInOrNot = Session["loggedIn"];
+    if (loggedInOrNot == null || !loggedInOrNot.ToString().Equals("true"))
+    {
+        Response.Redirect("~/LoginPage.cshtml");
+
+    }
+
+    var db = Database.Open("AccountsDB");
+    var selectQueryString = "Select Id,name, price, CONVERT(varchar,date,3) as date, launched from Rooms";
+}
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Staff page</title>
+    <link rel="stylesheet" href="~/stylesheetFile.css"/>
+</head>
+<body>
+    <button><a href="~/createRoom.cshtml" style="text-decoration:none;">Create Room</a></button>
+    <button><a href="~/LoginPage.cshtml" style="text-decoration:none;">Log Out</a></button>
+    <table class="staffTable">
+        <thead>
+            <tr>
+                <th>&nbsp;</th>
+                <th>Room Name</th>
+                <th>Price</th>
+                <th>Date</th>
+                <th>Launched Status</th>
+                <th>&nbsp;</th>
+                <th>&nbsp;</th>
+            </tr>
+        </thead>
+        @foreach (var row in db.Query(selectQueryString))
+        {
+            String Islaunched = "LAUNCHED";
+            if (!row.launched)
+            {
+                Islaunched = "NOT LAUNCHED";
+            }
+            <tbody>
+                <tr>
+                    <td><a href="@Href("~/roomInfo.cshtml",row.Id)">View Room Info</a></td>
+                    <td>@row.name</td>
+                    <td>@row.price</td>
+                    <td>@row.date</td>
+                    <td>@Islaunched</td>
+                    @if (!Islaunched.Equals("LAUNCHED"))
+                    {
+                        <td><a href="@Href("~/launchInfo.cshtml",row.Id)">Launch Room</a></td>
+                        <td><a href="@Href("~/StaffEditInfo.cshtml",row.Id)">Edit Room</a></td>
+                    }
+
+                </tr>
+            </tbody>
+        }
+    </table>
+</body>
+</html>

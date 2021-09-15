@@ -1,0 +1,28 @@
+﻿@{ 
+    var loggedInOrNot = Session["loggedIn"];
+    if (loggedInOrNot == null || !loggedInOrNot.ToString().Equals("true"))
+    {
+        Response.Redirect("~/LoginPage.cshtml");
+
+    }
+
+    var roomId = UrlData[0];
+    var db = Database.Open("AccountsDB");
+
+    var updateQuery = "Update Rooms set launched = 1 where Id =@0";
+    db.Execute(updateQuery, roomId);
+
+
+    Response.Redirect(@Href("~/StaffPage.cshtml"));
+}
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+
+</body>
+</html>

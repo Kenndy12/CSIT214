@@ -1,0 +1,20 @@
+﻿@{ 
+    var roomInfo = UrlData[0];
+
+    var db = Database.Open("AccountsDB");
+
+    var deleteQuery = "delete from Rooms where Id=@0";
+    db.Execute(deleteQuery, roomInfo);
+    Response.Redirect("~/StaffPage.cshtml");
+
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+
+</body>
+</html>

@@ -1,0 +1,21 @@
+﻿@{ 
+
+    var roomInfo = UrlData[0];
+
+    var db = Database.Open("AccountsDB");
+
+    var updateQuery = "update rooms set booked=@0,bookedBy=@1,actualCapacity=@2,promoCodeUsed=@3, " +
+                "actualCost=@4 where Id=@5";
+    db.Execute(updateQuery,0,null,null,null,null,roomInfo);
+    Response.Redirect("~/StudentPage.cshtml");
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+
+</body>
+</html>

@@ -1,0 +1,109 @@
+﻿@{
+    var loggedInOrNot = Session["loggedIn"];
+    if (loggedInOrNot == null || !loggedInOrNot.ToString().Equals("true"))
+    {
+        Response.Redirect("~/LoginPage.cshtml");
+
+    }
+
+    var roomName = "";
+    var price = Decimal.Zero;
+    var capacity = Decimal.Zero;
+    var date = DateTime.Now;
+    var timeStart = "";
+    var timeEnd = "";
+    var promoCode = "";
+    var errorMsg = "";
+    var db = Database.Open("AccountsDB");
+
+    Validation.RequireField("roomName", "All fields are mandatory");
+    Validation.RequireField("roomPrice", "All fields are mandatory");
+    Validation.RequireField("roomCapacity", "Room capacity is required.");
+    Validation.RequireField("roomDate", "All fields are mandatoryd");
+    Validation.RequireField("roomTimeStart", "All fields are mandatory");
+    Validation.RequireField("roomTimeEnd", "All fields are mandatory");
+    Validation.RequireField("roomCode", "All fields are mandatory");
+
+    if (IsPost && Validation.IsValid())
+    {
+        roomName = Request.Form["roomName"];
+        price = Request.Form["roomPrice"].AsDecimal();
+        capacity = Request.Form["roomCapacity"].AsDecimal();
+        date = Request.Form["roomDate"].AsDateTime();
+        timeStart = Request.Form["roomTimeStart"];
+        timeEnd = Request.Form["roomTimeEnd"];
+        promoCode = Request.Form["roomCode"];
+        var insertString = "insert into Rooms (name,price,capacity,date,timeStart,timeEnd,launched,booked,promoCode,approved)" +
+            "values(@0,@1,@2,@3,@4,@5,@6,@7,@8,@9)";
+        db.Execute(insertString, roomName, price, capacity, date, timeStart, timeEnd, 0, 0, promoCode,0);
+        Response.Redirect(@Href("~/StaffPage.cshtml"));
+
+    }
+
+    else if (IsPost && !Validation.IsValid())
+    {
+        errorMsg = "";
+
+        errorMsg = "All fields are mandatory";
+    }
+
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+    <button><a href="~/StaffPage.cshtml" style="text-decoration:none;">Home</a></button>
+    <button><a href="~/LoginPage.cshtml" style="text-decoration:none;">Log Out</a></button>
+    <form method="post">
+        <fieldset>
+            <legend>Create Room</legend>
+            <div>
+                <label>Room Name: </label>
+                <input name="roomName" type="text" size="50" />
+            </div>
+
+            <div>
+                <label>Price: </label>
+                <input name="roomPrice" type="number" size="50" />
+            </div>
+
+            <div>
+                <label>Capacity: </label>
+                <input name="roomCapacity" type="number" size="50" />
+            </div>
+
+            <div>
+                <label>Date: </label>
+                <input name="roomDate" type="date" size="50" />
+            </div>
+
+            <div>
+                <label>Start Time: </label>
+                <input name="roomTimeStart" type="time" size="50" />
+            </div>
+
+            <div>
+                <label>End Time: </label>
+                <input name="roomTimeEnd" type="time" size="50" />
+            </div>
+
+            <div>
+                <label>Promotional Code: </label>
+                <input name="roomCode" type="text" size="50" />
+            </div>
+
+            <div>
+                <label>&nbsp;</label>
+                <input type="submit" value="Create" />
+            </div>
+
+            <div>
+                <label>@errorMsg</label>
+            </div>
+        </fieldset>
+    </form>
+</body>
+</html>

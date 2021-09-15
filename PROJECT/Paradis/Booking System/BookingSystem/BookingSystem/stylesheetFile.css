@@ -1,0 +1,16 @@
+﻿.staffTable, .studentTable, .bookingTable, .superUserTable {
+    border: 1px solid black;
+    border-collapse: collapse;
+    margin: 0 auto;
+    width: 60%;
+    font-size: 20px;
+    text-align: center;
+}
+
+.staffTable tr, .staffTable td, .staffTable th, 
+.studentTable tr, .studentTable td, .studentTable th,
+.bookingTable tr, .bookingTable td, .bookingTable th,
+.superUserTable tr, .superUserTable td, .superUserTable th{
+    border: 1px solid black;
+    border-collapse: collapse;
+}
