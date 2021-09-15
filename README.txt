@@ -1,5 +1,4 @@
-Prototype1 = Program before the super user is added
-Prototype2 = Program after the super user is added
+A project on module CSIT214 IT Project Management 
 
 Accounts:
 staff001 	= STAFF
